@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  database:
+    build:
+      context: ./services/database
+
+  booking-service:
+    build:
+      context: ./services/booking-service
+
+  gateway-service:
+    build:
+      context: ./services/gateway-service
+    ports:
+      - "8087:8087"
+
+  hotel-service:
+    build:
+      context: ./services/hotel-service
+
+  loyalty-service:
+    build:
+      context: ./services/loyalty-service
+
+  payment-service:
+    build:
+      context: ./services/payment-service
+
+  report-service:
+    build:
+      context: ./services/report-service
+
+  session-service:
+    build:
+      context: ./services/session-service
+    ports:
+      - "8081:8081"
+
+  rabbit:
+    image: rabbitmq:3-management-alpine
