@@ -1,41 +1,39 @@
-version: '3'
+version: '3.8'
 
 services:
   database:
-    build:
-      context: ./services/database
+    image: asskkord/asskkord-images:database
 
   booking-service:
-    build:
-      context: ./services/booking-service
+    image: asskkord/asskkord-images:booking-service
 
   gateway-service:
-    build:
-      context: ./services/gateway-service
-    ports:
-      - "8087:8087"
+    image: asskkord/asskkord-images:gateway-service
+#   ports:
+#      - "8087:8087"
 
   hotel-service:
-    build:
-      context: ./services/hotel-service
+    image: asskkord/asskkord-images:hotel-service
 
   loyalty-service:
-    build:
-      context: ./services/loyalty-service
+    image: asskkord/asskkord-images:loyalty-service
 
   payment-service:
-    build:
-      context: ./services/payment-service
+    image: asskkord/asskkord-images:payment-service
 
   report-service:
-    build:
-      context: ./services/report-service
+    image: asskkord/asskkord-images:report-service
 
   session-service:
-    build:
-      context: ./services/session-service
-    ports:
-      - "8081:8081"
+    image: asskkord/asskkord-images:session-service
+#   ports:
+#      - "8081:8081"
 
   rabbit:
-    image: rabbitmq:3-management-alpine
+    image: asskkord/asskkord-images:rabbitmq
+
+  nginx:
+    image: asskkord/asskkord-images:nginx-proxy
+    ports:
+      - "8081:8081"
+      - "8087:8087"
