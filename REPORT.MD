@@ -51,3 +51,87 @@
    Останавливаем машину командой `vagrant halt` и уничтожаем её командой `vagrant destroy`
 
    ![destroy](screenshots/image10.png)
+
+## Part 3. Создание простейшего docker swarm
+
+   Обновляем **Vagrantfile** для создания трех машин
+
+   ![vagrantfile](screenshots/image11.png)
+
+   Указываем в нем для каждой машины выделяемую память и количество ядер, создаем внутреннюю сеть. Также для **manager** и **worker** нод указываем **.sh** файлы, запускающиеся при запусе:
+
+   manager:
+
+   ![manager](screenshots/image12.png)
+
+   Скрипт устанавливает докер, создает рабочую папку и закидывает туда исходники, а также инициализирует машину как **manager** ноду и копирует токен для подключения **worker** нод в общую для всех машин директорию.
+
+   worker:
+
+   ![worker](screenshots/image13.png)
+
+   Скрипт устанавливает докер, выполняет подключение машины к **manager** ноде.
+
+   Следующим шагом загружаем докер-образы сервисов на **docker hub**, т.к. **docker swarm** не умеет билдить образы по докерфайлам.
+
+   ![docker-hub](screenshots/image14.png)
+
+   Изменим **docker-compose.yaml**
+
+   ![docker-compose](screenshots/image15.png)
+
+   Поднимаем машины командой `vagrant up`
+   
+   Подключаемся к **manager** ноде командой `vagrant ssh manager01`
+
+   Запускаем стек сервисов командой `sudo docker stack deploy -c docker-compose.yaml app`
+
+   Имеем:
+
+   ![service-ls](screenshots/image16.png)
+
+   Далее настроим **nginx** прокси сервер. Для этого создадим еще одну директорию для сервиса. В ней будет лежать **Dockerfile** с описанным образом, **nginx.conf**, wait-for-it.sh.
+
+   ![nginx-dockerfile](screenshots/image17.png)
+
+   Из важного: точкой входа в контейнер определим последовательность **wait-for-it.sh** скриптов, которые проверяют доступны ли сервисы, с которыми **nginx** будет непосредственно работать, и только после этого запускает **nginx**.
+
+   ![nginx.conf](screenshots/image18.png)
+
+   В конфиге указываем сервера для проксирования и блоки **server** которые слушают порты **8081** и **8087** и проксируют запросы в определенные сервисы.
+
+   Необходимо также загрузить образ на **docker hub** и указать сервис и прокинутые порты в **docker-compose.yaml**. Это было показано выше.
+
+   Прогоняем тесты через **postman** (пришлось изменить адрес **localhost** на внешний адрес одной из поднятых машин)
+
+   ![postman](screenshots/image19.png)
+
+   Посмотрим распределение контейнеров по узлам:
+
+   manager01:
+
+   ![manager01-ps](screenshots/image20.png)
+
+   worker01:
+
+   ![worker01-ps](screenshots/image21.png)
+
+   worker02:
+
+   ![worker02-ps](screenshots/image22.png)
+
+   Поставим **Portainer** отдельным стеком
+
+   Для удобства написал **.sh** скрипт для запуска основного стека и стека с портейнером
+
+   ![start.sh](screenshots/image23.png)
+
+   Скрипт деплоит основной стек, скачивает **.yaml** файл с описанными сервисами портейнера и деплоит его. Портейнер раскидывает агент-сервисы на все машины и управляющий сервис на **manager** ноду.
+
+   Заходим в **Portainer** через браузер по порту **:9000**
+
+   ![dashboard](screenshots/image24.png)
+
+   ![services](screenshots/image25.png)
+
+   ![contaners](screenshots/image26.png)
